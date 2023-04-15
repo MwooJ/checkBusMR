@@ -277,6 +277,7 @@
     $("#add02").click(function () {
       
       // 버스 출발유무
+      nowBus = $('#selBus').val();
       if($("#status"+nowBus+"").val()=="1"){
         alert("이미 버스가 출발했습니다. 탑승이 불가능합니다.");
         return false;
