@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html >
 <head>
   <title>Slick Playground</title>
   <meta charset="UTF-8">
@@ -46,6 +46,8 @@
     .slick-current {
       opacity: 1;
     }
+
+    
   </style>
 </head>
 
@@ -55,7 +57,7 @@
 		
 			<h2>BUS CHECK</h2>
 
-      <table class="settings" style="margin: auto; text-align: center;">
+      <table class="settings" style="width:100%; margin: auto; text-align: center;">
 				<thead>
 					<tr>
 						<th class="default">버스생성</th>						
@@ -65,6 +67,8 @@
 					<tr>						
 						<td>
               <input type="text" id="mkBus" value="" style="width: 70px;"onKeyup="this.value=this.value.replace(/[^-0-9]/g,'');"/> 대&nbsp;<input type="button" id="add01" value="버스 추가">
+              &nbsp;&nbsp;
+              <input type="button" id="reset" value="리셋">
             </td>
 					</tr>
 				</tbody>	
@@ -93,7 +97,7 @@
               <input type="text" id="name" value="" style="width: 100px;">&nbsp;
             </td>
 						<td>
-              <input type="button" id="add02" value="추가">
+              <input type="button" id="add02" value="추가">&nbsp;&nbsp;              
             </td>
 					</tr>
 				</tbody>	
@@ -101,36 +105,56 @@
 		
 	</section>
   
+  <!--버스-->
   <section class="regular slider" id="addBusSc">
-    <!--
-    <div>
-      <img src="http://placehold.it/350x300?text=1">
-    </div>
-    <div>
-      <img src="http://placehold.it/350x300?text=2">
-    </div>
-    <div>
-      <img src="http://placehold.it/350x300?text=3">
-    </div>
-    <div>
-      <img src="http://placehold.it/350x300?text=4">
-    </div>
-    <div>
-      <img src="http://placehold.it/350x300?text=5">
-    </div>
-    <div>
-      <img src="http://placehold.it/350x300?text=6">
-    </div>
-    -->
-  </section>
+    
+  </section>  
+  <br/>
+  <!--인원보기-->  
+  <section id="showBus" class="blue" style="text-align: center; display: none;">    
+    <thead>
+      <tr>
+        <th class="default">
+          <h2>
+            <span id="tsiw">탑승인원</span>&nbsp;&nbsp;
+            <input type="button" id="go"    value="출발">
+            &nbsp;
+            <input type="button" id="stay"  value="대기">
+            &nbsp;
+            <input type="button" id="close" value="닫기">
+          </h2>
+        </th>						
+      </tr>
+    </thead>
+    <table border="1" class="settings" style="margin: auto; text-align: center;" >      
+      <tbody id="showBusAdd">		
+
+      </tbody>	
+    </table>
+  </section> 
 
   <script src="https://code.jquery.com/jquery-2.2.0.min.js" type="text/javascript"></script>
   <script src="./slick/slick.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript">
+    
     $(document).on('ready', function() {
       
     var addYn = false;    
-    
+    var bus1=[],bus2=[],bus3=[],bus4=[],bus5=[];
+    var bus6=[],bus7=[],bus8=[],bus9=[],bus10=[];
+    var bus11=[],bus12=[],bus13=[],bus14=[],bus15=[];
+    var nowBus;
+
+    $("#reset").click(function () {
+      var result = confirm('입력한 내용이 초기화 됩니다. 리셋 하시겠습니까?');
+      if(result) {
+        //yes
+        location.href="https://mwooj.github.io/checkBusMR/index.html";
+      } else {
+        return false;
+      }
+    });
+
     $("#add01").click(function () {
 
       if(!addYn){
@@ -144,11 +168,23 @@
         //버스 추가
         var mkBus = $('#mkBus').val();
         mkBus = parseInt(mkBus);
-        for(var i=0; i<mkBus; i++){
-          $("#selBus").append("<option value='"+(i+1)+"번 버스'>"+(i+1)+"번 버스</option>") ; 
-          
-          $("#addBusSc").append("<div>&nbsp;<span id='busgo'>대기중</span><br/>&nbsp;&nbsp;&nbsp;<span id='nbusPs'>0명</span><br/>"+(i+1)+"번 버스</div>") ; 
 
+        if(mkBus>15){          
+          alert("최대 15대까지 가능합니다.");
+          $('#mkBus').focus();
+          return false;
+        }
+
+        for(var i=0; i<mkBus; i++){
+          $("#selBus").append("<option value='"+(i+1)+"'>"+(i+1)+"번 버스</option>") ; 
+          
+          $("#addBusSc").append("<div id='addclass'>&nbsp;<span id='busgo"+(i+1)+"'>대기중</span><br/>&nbsp;&nbsp;&nbsp;"+
+                                "<input type='hidden' id='status"+(i+1)+"' value='0'>"+
+                                "<span id='nbusPs"+(i+1)+"'>0</span><span>명</span><br/>"+
+                                (i+1)+"번 버스<br/>"+
+                                "<input type='button' id='buscheck"+(i+1)+"' name='"+(i+1)+"' value='인원확인'>"+
+                                "</div>"                                
+                                ) ; 
         }
 
         $(".regular").slick({
@@ -159,11 +195,93 @@
         });
      }
      addYn = true;
+     $("[data-slick-index]").addClass("slick-current");
+
+
+      //인원보기 
+      $("input[id^='buscheck']").click(function () {      
+          //alert($(this).attr('name'));     
+          var arrNum = parseInt($(this).attr('name'));     
+          console.log("arrNum : ",arrNum) ;
+          $("#showBus").css('display', '');
+
+          var arrBus = eval('bus'+arrNum);
+          nowBus = arrNum;
+          console.log("arrBus : ",arrBus);
+          
+          $("#tsiw").text(arrNum+"번 버스 탑승인원");
+          $("#showBusAdd").empty();
+          for(var k=0; k<arrBus.length; k++){            
+            $("#showBusAdd").append("<tr id='tr"+(k+1)+"'>"+
+                                      "<td>"+
+                                        arrBus[k]+"&nbsp;&nbsp;<input type='button' id='minu"+(k+1)+"' value='하차'> "+
+                                        "<input type='hidden' name='minu"+(k+1)+"' value='"+arrBus[k]+"'>"+
+                                      "</td>"+     
+                                    "<tr/>"                        
+                                ) ; 
+          }            
+          
+          $("input[id^='minu']").click(function () {  
+            console.log("bf ", arrBus);            
+            var result = confirm($("input[name="+$(this).attr('id')+"]").val()+" 하차 시키시겠습니까?");
+            if(result) {
+
+              for(var j = 0; j < arrBus.length; j++){ 
+                if (arrBus[j] === $("input[name="+$(this).attr('id')+"]").val()) { 
+                  arrBus.splice(j, 1); 
+                  j--; 
+                }
+              }
+              //arrBus = arrBus.filter((element) => element !== $("input[name="+$(this).attr('id')+"]").val());
+              $("#nbusPs"+arrNum+"").text(arrBus.length);     
+              console.log("id : "+$(this).attr('id'));
+              var rmvN = $(this).attr('id').replace("minu","");
+              console.log("rmvN : "+rmvN);
+              $("#tr"+rmvN+"").remove();
+            }else{
+              return false;
+            }
+            console.log("aft ", arrBus);
+          });
+      });
+
     });
+    
+    $("#go").click(function () {      
+      var result = confirm(nowBus+"번 Bus 출발 시키시겠습니까?");
+      if(result) {
+        $("#status"+nowBus+"").val("1");
+        $("#busgo"+nowBus+"").html("&nbsp;&nbsp;출발");        
+      }else{
+        return false;
+      }
+    }); 
+
+    $("#stay").click(function () {
+      var result = confirm(nowBus+"번 Bus 대기중으로 변경 하겠습니까?");
+      if(result) {
+        $("#status"+nowBus+"").val("0");
+        $("#busgo"+nowBus+"").html("대기중");        
+      }else{
+        return false;
+      }
+    }); 
+
+    $("#close").click(function () {
+      $("#showBusAdd").empty();
+      $("#showBus").css('display', 'none');
+    });  
 
 
+    var arrBus2 = [];
     $("#add02").click(function () {
       
+      // 버스 출발유무
+      if($("#status"+nowBus+"").val()=="1"){
+        alert("이미 버스가 출발했습니다. 탑승이 불가능합니다.");
+        return false;
+      }
+
       console.log($('#selBus option').length);
       var nBusCehck = $('#selBus option').length
       if(nBusCehck < 2){
@@ -179,17 +297,219 @@
         $('#selBus').focus();
         return false;
       }
+
+      if($('#team').val().trim().length < 1){        
+        alert("소속을 입력해주세요.");
+        $('#team').focus();
+        return false;
+      }
+
+      if($('#name').val().trim().length < 1){        
+        alert("이름을 입력해주세요.");
+        $('#name').focus();
+        return false;
+      }
+
+
+      var addBusNum = $('#selBus').val();
+      addBusNum = parseInt(addBusNum);
+
+      var addTeam = $('#team').val();
+      var addName = $('#name').val();
+      var result = confirm(addBusNum+'번 Bus / 소속 : '+addTeam+" / 이름 : "+addName+" 탑승합니다.");
       
+      
+      if(result) {
+
+        console.log("bus : "+addBusNum+" team : "+addTeam+" name : "+addName);
+        var n=0;
+        switch (addBusNum) {
+          case 1 :                 
+            if(bus1.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            }   
+            bus1.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            console.log("bus1 ",bus1);
+            break;
+          case 2 :
+          if(bus2.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus2.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 3 :
+          if(bus3.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus3.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 4 :
+          if(bus4.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus4.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 5 :
+          if(bus5.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus5.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
 
 
+          case 6 :
+          if(bus6.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus6.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 7 :
+          if(bus7.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus7.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 8 :
+          if(bus8.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus8.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 9 :
+          if(bus9.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus9.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 10 :
+          if(bus10.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus10.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
 
+
+          case 11 :
+          if(bus11.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus11.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 12 :
+          if(bus12.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus12.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 13 :
+          if(bus13.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus13.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 14 :
+          if(bus14.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus14.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;
+          case 15 :
+          if(bus5.indexOf("소속 : "+addTeam+"  이름 : "+addName) > -1){
+              addName=addName+"_동명이인";
+            } 
+            bus15.push("소속 : "+addTeam+"  이름 : "+addName);
+            n=parseInt($('#nbusPs'+addBusNum+'').text());
+            if(n==45){
+              alert(addBusNum+"번 Bus 만원 추가탑승 '불가'"); return false;              
+            }
+            $('#nbusPs'+addBusNum+'').text((n+1));
+            break;         
+        }
+
+        $('#team').val("");
+        $('#name').val("");
+        //alert(nowBus);
+        $("#buscheck"+addBusNum+"").trigger("click");        
+
+      } else {
+        return false;
+      }
     });
 
 
-
-
-
-    });
+    
+    
+  });
 </script>
 
 </body>
